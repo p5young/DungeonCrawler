@@ -90,8 +90,6 @@ int main (int argc, char *argv[] ) {
 	// Construct Game
 	Game game = Game( classtype );
 
-	cout << "GAME CONSTRUCTED" << endl;
-
 	// Run the game
 	try {
 		for ( ;; ) {
