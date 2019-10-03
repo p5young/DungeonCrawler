@@ -5,7 +5,7 @@ Type `make` to compile
 Type `./cc3k` to run
 
 ## Symbols:
-@: You! The player character
+@: You! The player character\
 <: The stairs leading to the next floor. There are 5 floors until you reach the end.
 
 |Enemy | Display | HP | Atk | Def | Item Dropped | Special Abilities |
