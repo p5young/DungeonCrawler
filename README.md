@@ -1,7 +1,7 @@
 # DungeonCrawler
 ## Terminal Based Dungeon Crawling Game (for Linux/Unix environments)
 
-Type `make` to compile
+Type `make` to compile (optional, since repo comes with executable cc3k)\
 Type `./cc3k` to run
 
 ## Symbols:
