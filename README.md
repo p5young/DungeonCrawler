@@ -1,10 +1,10 @@
 # DungeonCrawler
-##Terminal Based Dungeon Crawling Game (for Linux/Unix environments)
+## Terminal Based Dungeon Crawling Game (for Linux/Unix environments)
 
 Type `make` to compile
 Type `./cc3k` to run
 
-##Symbols:
+## Symbols:
 @: You! The player character
 <: The stairs leading to the next floor. There are 5 floors until you reach the end.
 
@@ -17,7 +17,7 @@ Type `./cc3k` to run
 | Dragon | D | 150 | 50 | 10 | None | Guards a Dragon Hoard |
 
 
-##Commands:
+## Commands:
 
 Directions: no, ne, ea, se, so, sw, we, nw
 
@@ -29,7 +29,7 @@ Grab/Consume (Potion or Gold Pile): u (direction)
 
 Quit: q
 
-##Cheats:
+## Cheats:
 
 Invincibility: `stopdeath`
 Stop enemies from moving: `stopwander`
