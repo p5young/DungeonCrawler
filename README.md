@@ -5,8 +5,10 @@ Type `make` to compile
 Type `./cc3k` to run
 
 ## Symbols:
-@: You! The player character\
-<: The stairs leading to the next floor. There are 5 floors until you reach the end.
+@: You! The player character.\
+<: The stairs leading to the next floor. There are 5 floors until you reach the end.\
+!: A potion. Potions can be good or bad.\
+$: A Gold Pile. All Gold Piles are good.
 
 |Enemy | Display | HP | Atk | Def | Item Dropped | Special Abilities |
 | --- | --- | --- | --- | --- | --- | --- |
