@@ -33,7 +33,7 @@ Quit: q
 
 ## Cheats:
 
-Invincibility: `stopdeath`
+Invincibility: `stopdeath`\
 Stop enemies from moving: `stopwander`
 
 ## Classes:
