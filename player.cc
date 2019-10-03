@@ -1,9 +1,13 @@
 #include "player.h"
 
+
+// Constructor
 Player::Player(Cell *location, playerClass c) : Character(location, c) {}
 
+// Destructor
 Player::~Player(){}
 
+// Player attacks in direction dir
 void Player::PlayerAttack(int dir){
   if(_name == "Knight" || _name == "Samurai")
     regAttack(dir);

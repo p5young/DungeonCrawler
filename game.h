@@ -40,6 +40,10 @@ class Game {
 	int turns;							// Number of turns taken
 	std::vector<GameObject*> objects;	// Vector to store GameObjects
 
+	// returns a random position as an int vector of length 3: [row][column][room number]
+	// if notroom is specified, then the position will be in a different room than that (numbered 1 through 5)
+	std::vector<int> Spawner(int notroom = 0);
+
 	// Populates the game board
 	// If this is not the first floor, make classtype = "Remove Potions"
 	void NewFloor(std::string classtype);

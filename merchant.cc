@@ -26,9 +26,9 @@ void Merchant::tick() {
       std::vector<Cell*> MoveOptions;
 
       // Collect move options                                                                                                                                      
-      for ( int i = 0 ; i < 8 ; ++i ) {                                          // 8 neighbours to every cell                                        
-	if (_location->neighbours[i]->ObjCanOcc) {                              // If Object Can Occupy cell                                                 
-	  MoveOptions.push_back(_location->neighbours[i]);        // Add to list                                                                       
+      for ( int i = 0 ; i < 8 ; ++i ) {						// 8 neighbours to every cell                                        
+	if (_location->neighbours[i]->ObjCanOcc) {				// If Object Can Occupy cell                                                 
+	  MoveOptions.push_back(_location->neighbours[i]);		// Add to list                                                                       
 	}
       }
 

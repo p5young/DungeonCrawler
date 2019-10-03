@@ -7,24 +7,6 @@
 
 using namespace std;
 
-/*/////// CC3K Notes ///////////////
-// 
-//
-//        _==/          i     i          \==_
-//      /XX/            |\___/|            \XX\
-//    /XXXX\            |XXXXX|            /XXXX\
-//   |XXXXXX\_         _XXXXXXX_         _/XXXXXX|
-//  XXXXXXXXXXXxxxxxxxXXXXXXXXXXXxxxxxxxXXXXXXXXXXX
-// |XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX|
-// XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-// |XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX|
-//  XXXXXX/^^^^"\XXXXXXXXXXXXXXXXXXXXX/^^^^^\XXXXXX
-//   |XXXX|      \XXXX/^^\XXXX/^^\XXXX/     |XXXX|
-//     \XX\       \X/    \XXXX/    \X/       /XX/
-//        "\       "      \X/      "        /"
-//
-////////////////////////////////// */
-
 // Translate a command into a numerical direction
 int direction(string& s) {
 	if (s == "nw") {
@@ -67,19 +49,16 @@ int WIDTH = 79;									// height of boars
 int HEIGHT = 25;								// width of board
 istream* board;									// istream to read board from
 int GP = 0;										// Gold Pieces
-bool spawns = true;								// Whether to randomly spawn creatures & objects
 bool stopdeath = false;							// Cheat to stop player death
 bool stopwander = false;						// Cheat top stop enemy movement
 
 // Main program
 int main (int argc, char *argv[] ) {
-	// Label to restart a game
-        seed = prng.seed();// store starting seed for resets
-	start:;
+    seed = prng.seed();// store starting seed for resets
+    start:	// used for restarting the game
 
 	// Program Variables
 	string classtype;							// Character class
-	bool maploaded = false;						// Used for iteration through command line arguments
 	std::istringstream defmap(defmapstring);	// convert string default map into istream
 	board = &defmap;							// initialize istream to read board from
 	board->exceptions( ios_base::failbit );		// set board to throw exceptions
@@ -108,33 +87,10 @@ int main (int argc, char *argv[] ) {
 		}
 	}  // for
 
-	// Command Line Argument Management
-	for ( int i = 1 ; i < argc ; ++i ) {
-		if (!is_number(argv[i])) {
-			if (!maploaded) {
-				maploaded = true;
-				try {
-					board = new ifstream( argv[i] );
-					board->exceptions( ios_base::failbit );
-					spawns = false;
-					prng.seed(seed); 
-					cout << "Loading board from '" << argv[i] << "'." << endl;
-				} catch ( ios_base::failure ) {
-					cout << "Problem loading board from map file '" << argv[i] << "'." << endl;
-					delete board;
-					board = &defmap;
-					board->exceptions( ios_base::failbit );
-				}
-			}
-		} else {
-		  seed = (atoi(argv[i]));
-		  prng.seed(seed);
-		  // argument is number, make seed
-		}
-	}
-
 	// Construct Game
 	Game game = Game( classtype );
+
+	cout << "GAME CONSTRUCTED" << endl;
 
 	// Run the game
 	try {
@@ -222,11 +178,10 @@ int main (int argc, char *argv[] ) {
 			  cout << "Are you sure you want to restart? (y/n)" << endl;
 			  while(true){
 			    cin >> command;
-                            if (cin.fail()) throw error( "EOF detected");
-                            if(command == "y"){
+                if (cin.fail()) throw error( "EOF detected");
+                if(command == "y"){
 			      if ( board != &defmap ) delete board;
 			      GP = 0;
-			      spawns = true;
 			      prng.seed(seed); //reseed
                               goto start;
                             }
@@ -264,7 +219,6 @@ int main (int argc, char *argv[] ) {
 					if (command == "y") {
 						if ( board != &defmap ) delete board;
 						GP = 0;
-						spawns = true;
 						prng.seed(seed); //reseed
 						goto start;										// RESTART GAME
 					} else if (command == "n") {

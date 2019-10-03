@@ -1,5 +1,5 @@
 #include "game.h"
-#include "spawner.h"
+
 
 // constructor
 Game::Game(std::string &classtype) : grid() {
@@ -39,6 +39,102 @@ Game::~Game() {
 	delete [] grid;
 
 }  // destructor
+
+
+
+// returns a vector of length 3
+// returns r, c, room#
+// where r, c == row, column
+// room# is in the range (1,5)
+// if notroom is specified (range 1,5), then this will return coordinates in a different room
+std::vector<int> Game::Spawner(int notroom) {
+	// return value
+	std::vector<int> retval(3);
+
+	// random number determining spawn
+	int randval;
+	if (notroom == 0) {
+		randval = prng(604);	// 604 is the number of available locations on the map
+	} else if (notroom == 1) {
+		randval = prng(500) + 104;
+	} else if (notroom == 2) {
+		randval = prng(403);
+		if (randval > 103) randval += 201;
+	} else if (notroom == 3) {
+		randval = prng(568);
+		if (randval > 304) randval += 36;
+	} else if (notroom == 4) {
+		randval = prng(457);
+		if (randval > 340) randval += 147;
+	} else if (notroom == 5) {
+		randval = prng(487);
+	} else {
+		cout << "ERROR: Spawner(notroom) called with invalid value" << endl;
+	}
+
+	// first room
+	if (randval <= 103)
+	{
+		retval[0] = 3 + (randval / 26);	// row
+		retval[1] = 3 + (randval % 26);	// col
+		retval[2] = 1;					// room #
+	}
+	// second room
+	else if (randval <= 304)
+	{
+		randval -= 104;	// make randval in the range (0, 200) because there's 201 spots in room 2
+		if (randval <= 45) {
+			retval[0] = 3 + (randval / 23);
+			retval[1] = 39 + (randval % 23);
+		} else if (randval <= 76) {
+			randval -= 46;	// randval now in the range (0,30)
+			retval[0] = 5;
+			retval[1] = 39 + randval;
+		} else if (randval <= 110) {
+			randval -= 77;	// randval now in the range (0, 33)
+			retval[0] = 6;
+			retval[1] = 39 + randval;
+		} else {
+			randval -= 111;	// randval now in the range (0, 89)
+			retval[0] = 7 + (randval / 15);
+			retval[1] = 61 + (randval % 15);
+		}
+		retval[2] = 2;	// room #
+	}
+	// third room
+	else if (randval <= 340)
+	{
+		randval -= 305;	// now in range (0, 35)
+		retval[0] = 10 + (randval / 12);
+		retval[1] = 38 + (randval % 12);
+		retval[2] = 3;
+	}
+	// fourth room
+	else if (randval <= 487)
+	{
+		randval -= 341;	// now in range (0, 146)
+		retval[0] = 15 + (randval / 21);
+		retval[1] = 5 + (randval % 21);
+		retval[2] = 4;
+	}
+	// fifth room
+	else if (randval <= 604)
+	{
+		randval -= 488;	// now in range (0, 116)
+		if (randval <= 32) {
+			retval[0] = 16 + (randval / 11);
+			retval[1] = 65 + (randval % 11);
+		} else {
+			randval -= 32;	// now in range (0, 84)
+			retval[0] = 19 + (randval / 39);
+			retval[1] = 37 + (randval % 39);
+		}
+		retval[2] = 5;
+	}
+
+	return retval;
+}
+
 
 // Initialize a new floor; all consumable and monsters are deleted and randomly generated; player is create if it is start of game
 void Game::NewFloor(std::string classtype) {
@@ -155,115 +251,113 @@ void Game::NewFloor(std::string classtype) {
 	}	
 
 	// Generate player, stairs, monsters, items
-	if (spawns) {
 
-		// Temporary location to be used for spawns
-		std::vector<int> SpawnHere;
+	// Temporary location to be used for spawns
+	std::vector<int> SpawnHere;
 
-		// Spawn Player
+	// Spawn Player
+	SpawnHere = Spawner();
+	if (classtype == "k") {
+	  player = new Player(&(grid[SpawnHere[0]][SpawnHere[1]]),Player::Knight);
+	  Orc::setHostile(true);
+	  Dragon::setHostile(true);
+	  Merchant::setHostile(false);
+	  GridBug::setHostile(true);
+	  Goblin::setHostile(true);			
+	} else if (classtype == "s" ) {
+	  player = new Player(&(grid[SpawnHere[0]][SpawnHere[1]]),Player::Samurai);
+	  // set enemies to non-hostile default
+	  Orc::setHostile(false);
+	  Dragon::setHostile(false);
+	  Merchant::setHostile(false);
+	  GridBug::setHostile(false);
+	  Goblin::setHostile(false);
+
+	} else if (classtype == "w") {
+	  player = new Player(&(grid[SpawnHere[0]][SpawnHere[1]]),Player::Wizard);
+	  Orc::setHostile(true);
+	  Dragon::setHostile(true);
+	  Merchant::setHostile(false);
+	  GridBug::setHostile(true);
+	  Goblin::setHostile(true);			
+	  
+	} else if (classtype == "New Floor") {
+		player->SetLocation(&(grid[SpawnHere[0]][SpawnHere[1]]));
+		player->resetStats();
+	}
+
+	// Spawn Stairs
+	SpawnHere = Spawner(SpawnHere[2]);					// Special call so stairs don't spawn in player's room
+	grid[SpawnHere[0]][SpawnHere[1]]._display = '>';
+	grid[SpawnHere[0]][SpawnHere[1]].ObjCanOcc = false;
+	
+	
+	// Spawn Potions
+	for ( int i = 0 ; i < 10 ; ++i ) {
+		int PotionType = prng(5);
+		while ((grid[SpawnHere[0]][SpawnHere[1]]).display() != '.') {
+			SpawnHere = Spawner();	// reroll til empty
+		}
+		objects.push_back(new Potion(&(grid[SpawnHere[0]][SpawnHere[1]]),'0' + PotionType));
+	}
+
+	// spawn gold piles
+	for (int i=0; i<10 ;i++){
+	  int goldType = prng(7);
+	  if(goldType <= 6){
+	    
+	    while((grid[SpawnHere[0]][SpawnHere[1]]).display() != '.'){
+	      SpawnHere = Spawner();
+	    }
+	    
+	    objects.push_back(new Treasure(&(grid[SpawnHere[0]][SpawnHere[1]]), '0' + goldType));
+	  }
+	  else{
+	    bool placed = false;
+	    while(!placed){
+
+	      while((grid[SpawnHere[0]][SpawnHere[1]]).display() != '.'){
 		SpawnHere = Spawner();
-		if (classtype == "k") {
-		  player = new Player(&(grid[SpawnHere[0]][SpawnHere[1]]),Player::Knight);
-		  Orc::setHostile(true);
-		  Dragon::setHostile(true);
-		  Merchant::setHostile(false);
-		  GridBug::setHostile(true);
-		  Goblin::setHostile(true);			
-		} else if (classtype == "s" ) {
-		  player = new Player(&(grid[SpawnHere[0]][SpawnHere[1]]),Player::Samurai);
-		  // set enemies to non-hostile default
-		  Orc::setHostile(false);
-		  Dragon::setHostile(false);
-		  Merchant::setHostile(false);
-		  GridBug::setHostile(false);
-		  Goblin::setHostile(false);
-
-		} else if (classtype == "w") {
-		  player = new Player(&(grid[SpawnHere[0]][SpawnHere[1]]),Player::Wizard);
-		  Orc::setHostile(true);
-		  Dragon::setHostile(true);
-		  Merchant::setHostile(false);
-		  GridBug::setHostile(true);
-		  Goblin::setHostile(true);			
-		  
-		} else if (classtype == "New Floor") {
-			player->SetLocation(&(grid[SpawnHere[0]][SpawnHere[1]]));
-			player->resetStats();
+	      }
+	  
+	      Cell *goldLocation = &(grid[SpawnHere[0]][SpawnHere[1]]);
+	    
+	      std::vector<Cell*> DragonOptions;
+	      for(int i=0; i<8; i++){
+		if(goldLocation->neighbours[i]->ObjCanOcc){
+		  DragonOptions.push_back(goldLocation->neighbours[i]);
 		}
+	      }
+	      if (DragonOptions.size() == 0){ //no place to put dragon; reroll
+		continue;
+	      }
+	     
+	      int placeDragon = prng(DragonOptions.size()-1); //select one of available spots to place dragon
+	      Treasure * treasure = new Treasure(goldLocation, '0' + goldType);
+	      Dragon * dragon = new Dragon(DragonOptions[placeDragon], treasure);
+	      objects.push_back(treasure);
+	      objects.push_back(dragon);
+	      placed = true;
+	    }// end while; end placing dragon + dragon hoard
+	  }//end else; 
+	}// end for
 
-		// Spawn Stairs
-		SpawnHere = Spawner(SpawnHere[2]);					// Special call so stairs don't spawn in player's room
-		grid[SpawnHere[0]][SpawnHere[1]]._display = '>';
-		grid[SpawnHere[0]][SpawnHere[1]].ObjCanOcc = false;
-		
-		
-		// Spawn Potions
-		for ( int i = 0 ; i < 10 ; ++i ) {
-			int PotionType = prng(5);
-			while ((grid[SpawnHere[0]][SpawnHere[1]]).display() != '.') {
-				SpawnHere = Spawner();	// reroll til empty
-			}
-			objects.push_back(new Potion(&(grid[SpawnHere[0]][SpawnHere[1]]),'0' + PotionType));
-		}
-
-		// spawn gold piles
-		for (int i=0; i<10 ;i++){
-		  int goldType = prng(7);
-		  if(goldType <= 6){
-		    
-		    while((grid[SpawnHere[0]][SpawnHere[1]]).display() != '.'){
-		      SpawnHere = Spawner();
-		    }
-		    
-		    objects.push_back(new Treasure(&(grid[SpawnHere[0]][SpawnHere[1]]), '0' + goldType));
-		  }
-		  else{
-		    bool placed = false;
-		    while(!placed){
-
-		      while((grid[SpawnHere[0]][SpawnHere[1]]).display() != '.'){
-			SpawnHere = Spawner();
-		      }
-		  
-		      Cell *goldLocation = &(grid[SpawnHere[0]][SpawnHere[1]]);
-		    
-		      std::vector<Cell*> DragonOptions;
-		      for(int i=0; i<8; i++){
-			if(goldLocation->neighbours[i]->ObjCanOcc){
-			  DragonOptions.push_back(goldLocation->neighbours[i]);
-			}
-		      }
-		      if (DragonOptions.size() == 0){ //no place to put dragon; reroll
-			continue;
-		      }
-		     
-		      int placeDragon = prng(DragonOptions.size()-1); //select one of available spots to place dragon
-		      Treasure * treasure = new Treasure(goldLocation, '0' + goldType);
-		      Dragon * dragon = new Dragon(DragonOptions[placeDragon], treasure);
-		      objects.push_back(treasure);
-		      objects.push_back(dragon);
-		      placed = true;
-		    }// end while; end placing dragon + dragon hoard
-		  }//end else; 
-		}// end for
-
-		// spawn enemies!
-		for(int i=0; i<20; i++){
-		  int enemyType = prng(5) + 1; // 1 to 6
-		  SpawnHere = Spawner();
-		  while ((grid[SpawnHere[0]][SpawnHere[1]]).display() != '.') {
-		    SpawnHere = Spawner();  // reroll til empty               
-		  }
-		  
-		  if(enemyType <= 2)
-		    objects.push_back(new GridBug(&(grid[SpawnHere[0]][SpawnHere[1]])));
-		  else if (enemyType <= 4)
-		    objects.push_back(new Goblin(&(grid[SpawnHere[0]][SpawnHere[1]])));
-		  else if (enemyType == 5)
-		    objects.push_back(new Orc(&(grid[SpawnHere[0]][SpawnHere[1]])));
-		  else if (enemyType == 6)
-		    objects.push_back(new Merchant(&(grid[SpawnHere[0]][SpawnHere[1]])));
-		}
+	// spawn enemies!
+	for(int i=0; i<20; i++){
+	  int enemyType = prng(5) + 1; // 1 to 6
+	  SpawnHere = Spawner();
+	  while ((grid[SpawnHere[0]][SpawnHere[1]]).display() != '.') {
+	    SpawnHere = Spawner();  // reroll til empty               
+	  }
+	  
+	  if(enemyType <= 2)
+	    objects.push_back(new GridBug(&(grid[SpawnHere[0]][SpawnHere[1]])));
+	  else if (enemyType <= 4)
+	    objects.push_back(new Goblin(&(grid[SpawnHere[0]][SpawnHere[1]])));
+	  else if (enemyType == 5)
+	    objects.push_back(new Orc(&(grid[SpawnHere[0]][SpawnHere[1]])));
+	  else if (enemyType == 6)
+	    objects.push_back(new Merchant(&(grid[SpawnHere[0]][SpawnHere[1]])));
 	}
 
 	// Print the board;
